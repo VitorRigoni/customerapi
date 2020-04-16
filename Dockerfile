@@ -7,12 +7,13 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 COPY ["src/CustomerApi/CustomerApi.csproj", "src/CustomerApi/CustomerApi.csproj"]
+COPY ["Nuget.config", "Nuget.config"]
 RUN dotnet restore "src/CustomerApi/CustomerApi.csproj"
 COPY . .
 RUN dotnet build "src/CustomerApi/CustomerApi.csproj" -c Release -o /app/build --no-restore
 
 FROM build AS publish
-RUN dotnet publish "src/CustomerApi/CustomerApi.csproj" -c Release -o /app/publish
+RUN dotnet publish "src/CustomerApi/CustomerApi.csproj" -c Release -o /app/publish --no-restore
 
 FROM base AS final
 WORKDIR /app
