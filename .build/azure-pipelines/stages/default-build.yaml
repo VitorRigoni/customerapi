@@ -1,0 +1,57 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+parameters:
+  buildConfiguration: 'Release'
+  beforeRestore: []
+  beforeBuild: []
+  afterBuild: []
+
+stages:
+  - stage: Build
+    jobs:
+      - job: Build
+        pool:
+          vmImage: 'ubuntu-latest'
+
+        variables:
+          SourceProjects: '**/*src/*.csproj'
+          UnitTestsProject: '**/*tests/CustomerApi.UnitTests/*.csproj'
+          Projects: |
+            $(SourceProjects)
+            $(UnitTestsProject)
+          PublishedProject: |
+            $(SourceProjects)
+
+        steps:
+          - task: UseDotNet@2
+            displayName: '.NET Core 3.1.x'
+            inputs:
+              version: '3.1.x'
+              packageType: sdk
+
+          - task: DotNetCoreCLI@2
+            displayName: Restore
+            inputs:
+              command: restore
+              projects: '$(Projects)'
+              feedsToUse: 'config'
+              nugetConfigPath: 'Nuget.config'
+
+          - task: DotNetCoreCLI@2
+            displayName: Build
+            inputs:
+              command: build
+              projects: '$(Projects)'
+              arguments: '--no-restore --configuration ${{ parameters.buildConfiguration }}'
+
+          - task: DotNetCoreCLI@2
+            displayName: Test
+            inputs:
+              command: test
+              projects: '$(UnitTestsProject)'
+              arguments: '--configuration ${{ parameters.buildConfiguration }}'
+  
+  - ${{ parameters.afterBuild }} # PlaceHolder statements 
