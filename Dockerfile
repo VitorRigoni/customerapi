@@ -6,16 +6,14 @@ WORKDIR /app
 EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
-WORKDIR /src
-COPY ["CustomerApi/CustomerApi.csproj", "CustomerApi"]
-RUN dotnet restore "CustomerApi/CustomerApi.csproj"
+COPY ["src/CustomerApi/CustomerApi.csproj", "src/CustomerApi/CustomerApi.csproj"]
+COPY ["Nuget.config", "Nuget.config"]
+RUN dotnet restore "src/CustomerApi/CustomerApi.csproj"
 COPY . .
-WORKDIR /src/CustomerApi
-RUN dotnet build "CustomerApi.csproj" -c Release -o /app/build
+RUN dotnet build "src/CustomerApi/CustomerApi.csproj" -c Release -o /app/build --no-restore
 
 FROM build AS publish
-WORKDIR /src/CustomerApi
-RUN dotnet publish "CustomerApi.csproj" -c Release -o /app/publish
+RUN dotnet publish "src/CustomerApi/CustomerApi.csproj" -c Release -o /app/publish --no-restore
 
 FROM base AS final
 WORKDIR /app
